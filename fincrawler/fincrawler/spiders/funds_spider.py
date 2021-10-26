@@ -36,7 +36,31 @@ class FundsSpider(scrapy.Spider):
         link_cda = response.xpath('//a[contains(@id, "Hyperlink1")]/@href').get()
         link_cda = link_cda.split('..')[-1]
         url = f'https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/CPublica/{link_cda}'
-        yield response.follow(url, callback=self.get_cda)
+        yield response.follow(url, callback=self.parse_cda)
 
-    def get_cda(self, response):
-        self.log(f'-------------------------->>>>> {response.url}')
+    def parse_cda(self, response):
+        fund_name = response.xpath('//span[contains(@id, "lbNmDenomSocial")]/text()').get()
+        fund_cnpj = response.xpath('//span[contains(@id, "lbNrPfPj")]/text()').get()
+        fund_admin = response.xpath('//span[contains(@id, "lbNmDenomSocialAdm")]/text()').get()
+
+        table = response.css('table#dlAplics')
+
+        datetime_register_cda = table.xpath('//span[contains(@id, "lbDtRegDoc")]/text()').get()
+
+        rows = table.xpath('./tr')[4:]
+        rowsdata = [row.xpath('./td/span') for row in rows]
+
+        data = {
+            "nome": fund_name,
+            "cnpj": fund_cnpj,
+            "administrador": fund_admin,
+            "datetime_registro_cda": datetime_register_cda,
+            "cda": [
+                {
+                    "ativo": rowdata.xpath('./text()')[1].get().strip(),
+                    "tipo_ativo": rowdata.xpath('./text()')[0].get().strip()
+                } for rowdata in rowsdata
+            ]
+        }
+
+        yield data

@@ -1,0 +1,4 @@
+flake8==4.0.1  # https://github.com/PyCQA/flake8
+flake8-isort==4.1.1  # https://github.com/gforcada/flake8-isort
+ipython==7.28.0  # https://ipython.org/
+Scrapy==2.5.1  # https://docs.scrapy.org/en/latest/#
