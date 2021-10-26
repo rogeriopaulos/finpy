@@ -3,10 +3,23 @@ import scrapy
 
 
 class FundsSpider(scrapy.Spider):
+
     name = "funds"
+
+    # Top 10 melhores fundos de investimento em ações mais investidos
+    # --------------------------------------------------------------------------
+    # fonte: https://bityli.com/4AOWY
     cnpjs = [
-        '23.865.920/0001-78',
-        '35.637.151/0001-30',
+        '34.461.733/0001-45',  # ARX INCOME PREVIDÊNCIA MASTER FUNDO DE INVESTIMENTO EM AÇÕES
+        '17.335.646/0001-22',  # INDIE FIC FI ACOES
+        '14.866.273/0001-28',  # BRASIL CAPITAL 30 FC FI EM ACOES
+        '26.673.556/0001-32',  # Alaska Black Institucional FIA
+        '17.162.002/0001-80',  # Occam Retorno Absoluto FIC FIM
+        '12.004.203/0001-35',  # Equitas Selection FIC FIA
+        '07.279.657/0001-89',  # AZ Quest Ações FIC FIA
+        '26.648.868/0001-96',  # Alaska Black FIC FIA II - BDR Nível I
+        '20.658.576/0001-58',  # Moat Capital FIC FIA
+        '28.747.685/0001-53',  # Kapitalo Tarkus FIC FIA
     ]
 
     def start_requests(self):
