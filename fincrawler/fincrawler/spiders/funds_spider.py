@@ -48,7 +48,13 @@ class FundsSpider(scrapy.Spider):
         datetime_register_cda = table.xpath('//span[contains(@id, "lbDtRegDoc")]/text()').get()
 
         rows = table.xpath('./tr')[4:]
-        rowsdata = [row.xpath('./td/span') for row in rows]
+        rowsdata = [row.xpath('./td') for row in rows]
+
+        exclude_ativos = ['Valores a pagar', 'Valores a receber']
+        rowsdata = [
+            data for data in rowsdata
+            if data.xpath('./span/text()')[0].get().strip().upper() not in [item.upper() for item in exclude_ativos]
+        ]
 
         data = {
             "nome": fund_name,
@@ -57,10 +63,22 @@ class FundsSpider(scrapy.Spider):
             "datetime_registro_cda": datetime_register_cda,
             "cda": [
                 {
-                    "ativo": rowdata.xpath('./text()')[1].get().strip(),
-                    "tipo_ativo": rowdata.xpath('./text()')[0].get().strip()
+                    "ativo": rowdata.xpath('./span/text()')[1].get().strip(),
+                    "tipo_ativo": rowdata.xpath('./span/text()')[0].get().strip(),
+                    "quantidade": self.get_quantity(rowdata),
+                    "valor_mercado": rowdata.xpath(
+                        "./span[@id[substring(.,string-length(.) - string-length('VlPosFim') + 1) = 'VlPosFim']]/text()"
+                    ).get(),
+                    "pl_percent": rowdata.xpath('./text()').getall()[-1]
                 } for rowdata in rowsdata
             ]
         }
 
         yield data
+
+    def get_quantity(self, rowdata):
+        asset_type = rowdata.xpath('./span/text()')[0].get().strip()
+        if asset_type.upper() == 'Títulos Públicos'.upper():
+            return rowdata.xpath('./text()').getall()[2]
+        else:
+            return rowdata.xpath('./text()').getall()[0]
