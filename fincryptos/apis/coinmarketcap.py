@@ -1,6 +1,8 @@
 import os
+
 from requests import Session
 from requests.models import Response
+
 from fincryptos.core import BaseAPI, CryptoAPI
 
 

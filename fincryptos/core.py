@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
-from requests.models import Response
+
 from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
+from requests.models import Response
 
 
 class BaseAPI(ABC):
