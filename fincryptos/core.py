@@ -24,3 +24,7 @@ class CryptoAPI(ABC):
     @abstractmethod
     def make_request(self) -> Response:
         ...
+
+
+def send2mongo(api: BaseAPI) -> None:
+    print(api.save())
