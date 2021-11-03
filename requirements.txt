@@ -6,3 +6,4 @@ Scrapy==2.5.1  # https://docs.scrapy.org/en/latest/#
 redis==3.5.3  # https://github.com/antirez/redis
 flower==1.0.0  # https://github.com/mher/flower
 kombu==5.2.0  # https://github.com/celery/kombu
+pymongo==3.12.1  # https://pymongo.readthedocs.io/en/stable/
