@@ -7,15 +7,13 @@ from fincryptos.core import BaseAPI, CryptoAPI
 class CoinMarketCapCryptoAPI(CryptoAPI):
 
     base_url = os.environ.get('COINMARKETCAP_BASE_URL')
-    parameters = {
-        'start': '1',
-        'limit': '5000',
-        'convert': 'USD'
-    }
     headers = {
         'Accepts': 'application/json',
         'X-CMC_PRO_API_KEY': os.environ.get('COINMARKETCAP_API_KEY'),
     }
+
+    def __init__(self, parameter):
+        self.parameters = parameter
 
     def make_request(self) -> Response:
         url = f'https://{self.base_url}/v1/cryptocurrency/listings/latest'
@@ -24,7 +22,12 @@ class CoinMarketCapCryptoAPI(CryptoAPI):
         return session.get(url, params=self.parameters)
 
 
-class CoinMarketCapBaseAPI(BaseAPI):
+class CoinMarketCap(BaseAPI):
 
     def get_api(self) -> CryptoAPI:
-        return CoinMarketCapCryptoAPI()
+        parameters = {
+            'start': '1',
+            'limit': '5000',
+            'convert': 'USD'
+        }
+        return CoinMarketCapCryptoAPI(parameters)
