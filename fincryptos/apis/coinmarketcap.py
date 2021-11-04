@@ -17,6 +17,9 @@ class CoinMarketCapCryptoAPI(CryptoAPI):
     def __init__(self, parameter):
         self.parameters = parameter
 
+    def __str__(self):
+        return 'CoinMarketCap API'
+
     def make_request(self) -> Response:
         url = f'https://{self.base_url}/v1/cryptocurrency/listings/latest'
         session = Session()
