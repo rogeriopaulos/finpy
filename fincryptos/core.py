@@ -1,3 +1,4 @@
+import datetime as dt
 import logging
 import os
 import urllib
@@ -27,14 +28,16 @@ class BaseAPI(ABC):
             LOGGER.info(f'Get data from {cryptoapi.__str__()}')
             response = cryptoapi.make_request()
             data = response.json()
+            timestamp = dt.datetime.now()
+            data = [dict(item, **{'_created_at': timestamp}) for item in data]
             LOGGER.info(f'Request successful: "status_code": {response.status_code}, "count": {len(data)}')
-            docs_count = self.create_mongo_docs(data)
+            docs_count = self.create_mongo_docs(data, timestamp)
             LOGGER.info(f'Created {docs_count} docs at mongodb')
         except (ConnectionError, Timeout, TooManyRedirects) as e:
             LOGGER.error('An error has occurred. Check traceback.')
             print(e)
 
-    def create_mongo_docs(self, data):
+    def create_mongo_docs(self, data, timestamp):
         username = urllib.parse.quote_plus(os.environ.get('MONGODB_USERNAME'))
         password = urllib.parse.quote_plus(os.environ.get('MONGODB_PASSWORD'))
         host = urllib.parse.quote_plus(os.environ.get('MONGODB_HOST'))
@@ -43,9 +46,11 @@ class BaseAPI(ABC):
         try:
             client = MongoClient(f'mongodb://{username}:{password}@{host}:{port}')
             db = client['cryptosdb']
-            db['currencies']
+            # db['currencies']
             cryptos = db.cryptos
             result = cryptos.insert_many(data)
+            requests_timestamp = db.requests_timestamp
+            requests_timestamp.insert_one({'requests_timestamp': timestamp})
             return len(result.inserted_ids)
         except (ConnectionFailure, BulkWriteError) as e:
             LOGGER.error('An error has occurred. Check traceback.')
