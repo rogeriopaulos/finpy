@@ -2,10 +2,11 @@ from abc import ABC, abstractmethod
 
 from pymongo.errors import BulkWriteError, ConnectionFailure
 
+from .bot import Telegram
 from .core import LOGGER, MongodbClient
 
 
-class AlertBase(ABC):
+class BaseAlert(ABC):
 
     def client(self):
         return MongodbClient().client()
@@ -20,18 +21,19 @@ class AlertBase(ABC):
         return [crypto for crypto in cryptos.find({'_created_at': last_request_timestamp})]
 
     @abstractmethod
-    def run_alert(self):
+    def create_alert(self):
         ...
 
 
-class AlertStartCryptoWithLetter(AlertBase):
+class AlertStartCryptoWithLetter(BaseAlert):
 
     def __init__(self, letter: str):
         self.letter = letter
 
-    def run_alert(self):
+    def create_alert(self):
         try:
-            return [crypto['id'] for crypto in self.dataset if crypto['id'].startswith(self.letter)]
+            result = [crypto['id'] for crypto in self.dataset if crypto['id'].startswith(self.letter)]
+            return ' '.join(result)
         except (ConnectionFailure, BulkWriteError) as e:
             LOGGER.error('An error has occurred. Check traceback.')
             print(e)
@@ -39,7 +41,11 @@ class AlertStartCryptoWithLetter(AlertBase):
 
 class RunAlerts:
 
-    alerts = [AlertStartCryptoWithLetter('W')]
+    _filter_alerts = [
+        AlertStartCryptoWithLetter('B')
+    ]
+    _bot = Telegram()
 
-    def run_alerts(self) -> list:
-        return [alert.run_alert() for alert in self.alerts]
+    def run_alerts(self):
+        for alert in self._filter_alerts:
+            self._bot.send_message(alert.create_alert())
