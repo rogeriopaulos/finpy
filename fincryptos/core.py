@@ -16,6 +16,19 @@ logging.basicConfig(level=logging.INFO, format=log_format)
 LOGGER = logging.getLogger('root')
 
 
+# Database
+# ------------------------------------------------------------------------------
+class MongodbClient:
+
+    username = urllib.parse.quote_plus(os.environ.get('MONGODB_USERNAME'))
+    password = urllib.parse.quote_plus(os.environ.get('MONGODB_PASSWORD'))
+    host = urllib.parse.quote_plus(os.environ.get('MONGODB_HOST'))
+    port = urllib.parse.quote_plus(os.environ.get('MONGODB_PORT'))
+
+    def client(self):
+        return MongoClient(f'mongodb://{self.username}:{self.password}@{self.host}:{self.port}')
+
+
 class BaseAPI(ABC):
 
     @abstractmethod
@@ -38,13 +51,8 @@ class BaseAPI(ABC):
             print(e)
 
     def create_mongo_docs(self, data, timestamp):
-        username = urllib.parse.quote_plus(os.environ.get('MONGODB_USERNAME'))
-        password = urllib.parse.quote_plus(os.environ.get('MONGODB_PASSWORD'))
-        host = urllib.parse.quote_plus(os.environ.get('MONGODB_HOST'))
-        port = urllib.parse.quote_plus(os.environ.get('MONGODB_PORT'))
-
         try:
-            client = MongoClient(f'mongodb://{username}:{password}@{host}:{port}')
+            client = MongodbClient().client()
             db = client['cryptosdb']
             # db['currencies']
             cryptos = db.cryptos
