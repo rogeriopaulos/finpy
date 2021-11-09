@@ -9,6 +9,7 @@ from fincryptos.core import BaseAPI, CryptoAPI
 class NomicsCryptoAPI(CryptoAPI):
 
     base_url = os.environ.get('NOMICS_BASE_URL')
+    collection_name = 'nomics'
 
     def __init__(self, parameter):
         self.parameters = parameter
@@ -23,14 +24,19 @@ class NomicsCryptoAPI(CryptoAPI):
 
 class Nomics(BaseAPI):
 
-    def get_api(self) -> CryptoAPI:
+    def get_api_data(self) -> dict:
         parameters = {
             'key': os.environ.get('NOMICS_API_KEY'),
-            # 'ids': 'BTC,ETH,ADA,DOT,BNB',
             'sort': 'first_priced_at',
-            # 'per-page': 100,
-            # 'page': 1,
             'interval': '1h,1d',
             'status': 'active'
         }
-        return NomicsCryptoAPI(parameters)
+        api = NomicsCryptoAPI(parameters)
+        response = api.make_request()
+        data = response.json()
+        return {
+            'data': data,
+            'source': api.__str__(),
+            'collection_name': api.collection_name,
+            'status_code': response.status_code
+        }

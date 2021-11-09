@@ -13,6 +13,7 @@ class CoinMarketCapCryptoAPI(CryptoAPI):
         'Accepts': 'application/json',
         'X-CMC_PRO_API_KEY': os.environ.get('COINMARKETCAP_API_KEY'),
     }
+    collection_name = 'coinmarketcap'
 
     def __init__(self, parameter):
         self.parameters = parameter
@@ -29,10 +30,18 @@ class CoinMarketCapCryptoAPI(CryptoAPI):
 
 class CoinMarketCap(BaseAPI):
 
-    def get_api(self) -> CryptoAPI:
+    def get_api_data(self) -> dict:
         parameters = {
             'start': '1',
             'limit': '5000',
             'convert': 'USD'
         }
-        return CoinMarketCapCryptoAPI(parameters)
+        api = CoinMarketCapCryptoAPI(parameters)
+        response = api.make_request()
+        data = response.json()
+        return {
+            'data': data['data'],
+            'source': api.__str__(),
+            'collection_name': api.collection_name,
+            'status_code': response.status_code
+        }

@@ -4,6 +4,7 @@ from celery import Celery
 from celery.schedules import crontab
 
 from fincryptos.alerts.runner import RunAlerts
+from fincryptos.apis.coinmarketcap import CoinMarketCap
 from fincryptos.apis.nomics import Nomics
 from fincryptos.core import clear_collections, send2mongo
 
@@ -37,5 +38,13 @@ def send_alerts():
 
 
 @app.task
-def clear_mongo_collection():
-    clear_collections()
+def send_coinmaeketcap_data2mongo():
+    result = send2mongo(CoinMarketCap())
+    # if result.get('status_code') == 200:
+    #     send_alerts.delay()
+    return result
+
+
+@app.task
+def clear_mongo_collection(collection_name):
+    clear_collections(collection_name)

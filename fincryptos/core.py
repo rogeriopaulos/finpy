@@ -29,34 +29,41 @@ class MongodbClient:
         return MongoClient(f'mongodb://{self.username}:{self.password}@{self.host}:{self.port}')
 
 
+# API
+# ------------------------------------------------------------------------------
 class BaseAPI(ABC):
 
     @abstractmethod
-    def get_api(self):
+    def get_api_data(self):
         ...
 
     def save(self):
         try:
-            cryptoapi = self.get_api()
-            LOGGER.info(f'Get data from {cryptoapi.__str__()}')
-            response = cryptoapi.make_request()
-            data = response.json()
+            api_data = self.get_api_data()
+            source = api_data.get('source')
+            status_code = api_data.get('status_code')
+            LOGGER.info(f'Get data from {source}')
             timestamp = dt.datetime.now()
-            data = [dict(item, **{'_created_at': timestamp, '_source': cryptoapi.__str__()}) for item in data]
-            LOGGER.info(f'Request successful: "status_code": {response.status_code}, "count": {len(data)}')
-            docs_count = self.create_mongo_docs(data, timestamp)
+
+            data = [dict(item, **{'_created_at': timestamp, '_source': source})
+                    for item in api_data.get('data')]
+            count_data = len(data)
+            LOGGER.info(f'Request successful: "status_code": {status_code}, "count": {count_data}')
+
+            docs_count = self.create_mongo_docs(data, timestamp, api_data.get('collection_name'))
             LOGGER.info(f'Created {docs_count} docs at mongodb')
-            return {"status_code": response.status_code, "count_docs": len(data)}
+
+            return {"status_code": status_code, "count_docs": count_data}
         except (ConnectionError, Timeout, TooManyRedirects) as e:
             LOGGER.error('An error has occurred. Check traceback.')
             print(e)
 
-    def create_mongo_docs(self, data, timestamp):
+    def create_mongo_docs(self, data, timestamp, collection_name):
         try:
             client = MongodbClient().client()
             db = client['cryptosdb']
-            cryptos = db.cryptos
-            result = cryptos.insert_many(data)
+            collection = db[collection_name]
+            result = collection.insert_many(data)
             requests_timestamp = db.requests_timestamp
             requests_timestamp.insert_one({'requests_timestamp': timestamp})
             return len(result.inserted_ids)
@@ -72,13 +79,15 @@ class CryptoAPI(ABC):
         ...
 
 
+# Helpers
+# ------------------------------------------------------------------------------
 def send2mongo(api: BaseAPI) -> None:
     return api.save()
 
 
-def clear_collections():
+def clear_collections(collection_name):
     client = MongodbClient().client()
     db = client['cryptosdb']
-    cryptos = db.cryptos
-    LOGGER.info('Removing docs from "cryptos" collection')
-    cryptos.delete_many({})
+    collection = db['collection_name']
+    LOGGER.info('Removing docs from "collection" collection')
+    collection.delete_many({})
