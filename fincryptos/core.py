@@ -74,3 +74,11 @@ class CryptoAPI(ABC):
 
 def send2mongo(api: BaseAPI) -> None:
     return api.save()
+
+
+def clear_collection():
+    client = MongodbClient().client()
+    db = client['cryptosdb']
+    cryptos = db.cryptos
+    LOGGER.info('Removing docs from "cryptos" collection')
+    cryptos.delete_many({})
