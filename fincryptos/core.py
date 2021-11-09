@@ -42,7 +42,7 @@ class BaseAPI(ABC):
             response = cryptoapi.make_request()
             data = response.json()
             timestamp = dt.datetime.now()
-            data = [dict(item, **{'_created_at': timestamp}) for item in data]
+            data = [dict(item, **{'_created_at': timestamp, '_source': cryptoapi.__str__()}) for item in data]
             LOGGER.info(f'Request successful: "status_code": {response.status_code}, "count": {len(data)}')
             docs_count = self.create_mongo_docs(data, timestamp)
             LOGGER.info(f'Created {docs_count} docs at mongodb')
@@ -54,7 +54,6 @@ class BaseAPI(ABC):
         try:
             client = MongodbClient().client()
             db = client['cryptosdb']
-            # db['currencies']
             cryptos = db.cryptos
             result = cryptos.insert_many(data)
             requests_timestamp = db.requests_timestamp
