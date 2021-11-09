@@ -13,6 +13,6 @@ class Telegram:
         bot = telegram.Bot(token=self.token)
         if len(msg) > 4096:
             for x in range(0, len(msg), 4096):
-                bot.send_message(self.chat_id, msg[x:x+4096])
+                bot.send_message(self.chat_id, msg[x:x+4096], parse_mode=telegram.ParseMode.HTML)
         else:
-            bot.send_message(self.chat_id, msg)
+            bot.send_message(self.chat_id, msg, parse_mode=telegram.ParseMode.HTML)
