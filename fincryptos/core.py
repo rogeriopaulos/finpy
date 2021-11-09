@@ -46,6 +46,7 @@ class BaseAPI(ABC):
             LOGGER.info(f'Request successful: "status_code": {response.status_code}, "count": {len(data)}')
             docs_count = self.create_mongo_docs(data, timestamp)
             LOGGER.info(f'Created {docs_count} docs at mongodb')
+            return {"status_code": response.status_code, "count_docs": len(data)}
         except (ConnectionError, Timeout, TooManyRedirects) as e:
             LOGGER.error('An error has occurred. Check traceback.')
             print(e)
@@ -72,4 +73,4 @@ class CryptoAPI(ABC):
 
 
 def send2mongo(api: BaseAPI) -> None:
-    print(api.save())
+    return api.save()

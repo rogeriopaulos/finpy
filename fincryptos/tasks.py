@@ -3,6 +3,7 @@ import os
 from celery import Celery
 from celery.schedules import crontab
 
+from fincryptos.alerts.runner import RunAlerts
 from fincryptos.apis.nomics import Nomics
 from fincryptos.core import send2mongo
 
@@ -15,10 +16,13 @@ app.conf.timezone = 'America/Fortaleza'
 
 @app.on_after_configure.connect
 def setup_periodic_tasks(sender, **kwargs):
-    # Calls every minute
-    sender.add_periodic_task(crontab(minute='*/1'), send_nomics_data2mongo.s())
+    # Requests to nomics api frequency
+    sender.add_periodic_task(crontab(minute='*/15'), send_nomics_data2mongo.s())
 
 
 @app.task
 def send_nomics_data2mongo():
-    send2mongo(Nomics())
+    result = send2mongo(Nomics())
+    if result.get('status_code') == 200:
+        RunAlerts().run_alerts()
+    return result
