@@ -5,7 +5,7 @@ from celery.schedules import crontab
 
 from fincryptos.alerts.runner import RunAlerts
 from fincryptos.apis.nomics import Nomics
-from fincryptos.core import clear_collection, send2mongo
+from fincryptos.core import clear_collections, send2mongo
 
 redis_url = os.environ.get('REDIS_URL')
 
@@ -38,4 +38,4 @@ def send_alerts():
 
 @app.task
 def clear_mongo_collection():
-    clear_collection()
+    clear_collections()

@@ -20,10 +20,10 @@ LOGGER = logging.getLogger('root')
 # ------------------------------------------------------------------------------
 class MongodbClient:
 
-    username = urllib.parse.quote_plus(os.environ.get('MONGODB_USERNAME'))
-    password = urllib.parse.quote_plus(os.environ.get('MONGODB_PASSWORD'))
-    host = urllib.parse.quote_plus(os.environ.get('MONGODB_HOST'))
-    port = urllib.parse.quote_plus(os.environ.get('MONGODB_PORT'))
+    username = urllib.parse.quote_plus(str(os.environ.get('MONGODB_USERNAME')))
+    password = urllib.parse.quote_plus(str(os.environ.get('MONGODB_PASSWORD')))
+    host = urllib.parse.quote_plus(str(os.environ.get('MONGODB_HOST')))
+    port = urllib.parse.quote_plus(str(os.environ.get('MONGODB_PORT')))
 
     def client(self):
         return MongoClient(f'mongodb://{self.username}:{self.password}@{self.host}:{self.port}')
@@ -76,7 +76,7 @@ def send2mongo(api: BaseAPI) -> None:
     return api.save()
 
 
-def clear_collection():
+def clear_collections():
     client = MongodbClient().client()
     db = client['cryptosdb']
     cryptos = db.cryptos
