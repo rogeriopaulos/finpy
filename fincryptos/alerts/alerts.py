@@ -4,6 +4,7 @@ from .base import BaseAlert
 class AlertStartCryptoWithLetter(BaseAlert):
 
     template_name = 'AlertStartCryptoWithLetter.html'
+    collection_data = 'nomics'
 
     def __init__(self, letter: str):
         self.letter = letter

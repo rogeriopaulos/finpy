@@ -64,8 +64,8 @@ class BaseAPI(ABC):
             db = client['cryptosdb']
             collection = db[collection_name]
             result = collection.insert_many(data)
-            requests_timestamp = db.requests_timestamp
-            requests_timestamp.insert_one({'requests_timestamp': timestamp})
+            requests_timestamp = db[f'{collection_name}_requests_timestamp']
+            requests_timestamp.insert_one({'request_timestamp': timestamp})
             return len(result.inserted_ids)
         except (ConnectionFailure, BulkWriteError) as e:
             LOGGER.error('An error has occurred. Check traceback.')

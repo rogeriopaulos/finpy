@@ -9,6 +9,7 @@ from fincryptos.core import LOGGER, MongodbClient
 class BaseAlert(ABC):
 
     template_name = None
+    collection_data = None
 
     def client(self):
         return MongodbClient().client()
@@ -18,10 +19,10 @@ class BaseAlert(ABC):
         try:
             client = self.client()
             db = client['cryptosdb']
-            requests_timestamp = db.requests_timestamp
-            last_request_timestamp = [r['requests_timestamp'] for r in requests_timestamp.find()][-1]
-            cryptos = db.cryptos
-            return [crypto for crypto in cryptos.find({'_created_at': last_request_timestamp})]
+            requests_timestamp_collection = db[f'{self.collection_data}_requests_timestamp']
+            last_request_timestamp = [r['request_timestamp'] for r in requests_timestamp_collection.find()][-1]
+            collection = db[self.collection_data]
+            return [crypto for crypto in collection.find({'_created_at': last_request_timestamp})]
         except (ConnectionFailure, BulkWriteError) as e:
             LOGGER.error('An error has occurred. Check traceback.')
             print(e)
