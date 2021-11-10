@@ -3,11 +3,14 @@ import os
 from celery import Celery
 from celery.schedules import crontab
 
-from fincryptos.alerts.runner import RunAlerts
+from fincryptos.alerts.alerts import AlertStartCryptoWithLetter
+from fincryptos.alerts.runner import send_alerts_if_need
 from fincryptos.apis.coinmarketcap import CoinMarketCap
 from fincryptos.apis.nomics import Nomics
 from fincryptos.core import clear_collections, send2mongo
 
+# Configs
+# ------------------------------------------------------------------------------
 redis_url = os.environ.get('REDIS_URL')
 
 app = Celery('fyncriptos', broker=redis_url)
@@ -24,27 +27,33 @@ def setup_periodic_tasks(sender, **kwargs):
     sender.add_periodic_task(crontab(minute=0, hour=0), clear_mongo_collection.s())
 
 
+# Mongodb Tasks
+# ------------------------------------------------------------------------------
 @app.task
 def send_nomics_data2mongo():
     result = send2mongo(Nomics())
     if result.get('status_code') == 200:
-        send_alerts.delay()
+        send_nomics_alerts_after_save.delay()
     return result
-
-
-@app.task
-def send_alerts():
-    RunAlerts().run_alerts()
 
 
 @app.task
 def send_coinmaeketcap_data2mongo():
     result = send2mongo(CoinMarketCap())
-    # if result.get('status_code') == 200:
-    #     send_alerts.delay()
     return result
 
 
 @app.task
-def clear_mongo_collection(collection_name):
+def clear_mongo_collection(collection_name: str):
     clear_collections(collection_name)
+
+
+# Alerts Tasks
+# ------------------------------------------------------------------------------
+@app.task
+def send_nomics_alerts_after_save():
+    alert1 = AlertStartCryptoWithLetter('B')
+
+    alerts = [alert1]
+    response = send_alerts_if_need(alerts)
+    return response
