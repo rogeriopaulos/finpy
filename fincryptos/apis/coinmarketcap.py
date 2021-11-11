@@ -1,3 +1,4 @@
+import math
 import os
 
 from requests import Session
@@ -14,19 +15,30 @@ class CoinMarketCapCryptoAPI(CryptoAPI):
         'X-CMC_PRO_API_KEY': os.environ.get('COINMARKETCAP_API_KEY'),
     }
     collection_name = 'coinmarketcap'
-
-    def __init__(self):
-        self.parameters = {
-            'start': '1',
-            'limit': self.get_limit(),
-            'convert': 'USD'
-        }
+    max_request_limit = 5000
 
     def __str__(self):
         return 'CoinMarketCap API'
 
-    def get_limit(self):
-        return '5000'
+    def get_total_currencies(self):
+        response_data = self.make_request('map').json()
+        if 'data' in response_data.keys():
+            total_currencies = len(response_data.get('data'))
+        return total_currencies
+
+    def get_data(self) -> Response:
+        total_currencies = self.get_total_currencies()
+
+        if total_currencies > self.max_request_limit:
+            intervals = self.get_intervals(total_currencies)
+
+        # return self.make_request('listings/latest', self.parameters)
+        return intervals
+
+    def get_intervals(self, total_currencies):
+        parts = math.ceil(total_currencies / self.max_request_limit)
+        max_interval = int(total_currencies / parts)
+        return [(i * max_interval + 1, ((i + 1) * max_interval) + 1) for i in range(parts)]
 
     def make_request(self, url_path, params=None) -> Response:
         url = f'https://{self.base_url}/v1/cryptocurrency/{url_path}'
@@ -38,20 +50,16 @@ class CoinMarketCapCryptoAPI(CryptoAPI):
             response = session.get(url)
         return response
 
-    def get_data(self) -> Response:
-        return self.make_request('listings/latest', self.parameters)
-
 
 class CoinMarketCap(BaseAPI):
 
     api = CoinMarketCapCryptoAPI()
 
     def get_api_data(self) -> dict:
-        response = self.api.get_data()
-        data = response.json()
+        data = self.api.get_data()
         return {
             'data': data['data'],
             'source': self.api.__str__(),
             'collection_name': self.api.collection_name,
-            'status_code': response.status_code
+            'status_code': data['status_code']
         }
