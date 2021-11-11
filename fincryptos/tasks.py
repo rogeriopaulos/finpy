@@ -23,8 +23,9 @@ def setup_periodic_tasks(sender, **kwargs):
     # Requests to nomics api frequency every minute
     sender.add_periodic_task(crontab(minute='*/1'), send_nomics_data2mongo.s())
 
-    # Clear mongodb cryptos collection every day at midnight
-    sender.add_periodic_task(crontab(minute=0, hour=0), clear_mongo_collection.s())
+    # Clear mongodb cryptos collection once week -> on sundays
+    sender.add_periodic_task(crontab(day_of_week=0), clear_nomics_collection.s())
+    sender.add_periodic_task(crontab(day_of_week=0), clear_cmc_collection.s())
 
 
 # Mongodb Tasks
@@ -44,8 +45,13 @@ def send_coinmaeketcap_data2mongo():
 
 
 @app.task
-def clear_mongo_collection(collection_name: str):
-    clear_collections(collection_name)
+def clear_nomics_collection():
+    clear_collections('nomics')
+
+
+@app.task
+def clear_cmc_collection():
+    clear_collections('coinmarketcap')
 
 
 # Alerts Tasks

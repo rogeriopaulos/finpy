@@ -87,7 +87,11 @@ def send2mongo(api: BaseAPI) -> None:
 
 def clear_collections(collection_name):
     client = MongodbClient().client()
+
     db = client['cryptosdb']
-    collection = db['collection_name']
-    LOGGER.info('Removing docs from "collection" collection')
-    collection.delete_many({})
+    collection_data = db[collection_name]
+    collection_timestamp = db[f'{collection_name}_requests_timestamp']
+
+    LOGGER.info(f'Removing docs from "{collection_data}" and "{collection_timestamp}" collection')
+    collection_data.delete_many({})
+    collection_timestamp.delete_many({})
