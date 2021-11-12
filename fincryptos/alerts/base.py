@@ -14,18 +14,37 @@ class BaseAlert(ABC):
     def client(self):
         return MongodbClient().client()
 
-    @property
-    def dataset(self) -> list:
+    def get_last_currencies(self) -> list:
         try:
             client = self.client()
             db = client['cryptosdb']
-            requests_timestamp_collection = db[f'{self.collection_data}_requests_timestamp']
-            last_request_timestamp = [r['request_timestamp'] for r in requests_timestamp_collection.find()][-1]
+
+            last_request_timestamp = self.get_last_request_timestamp(db)
+
             collection = db[self.collection_data]
             return [crypto for crypto in collection.find({'_created_at': last_request_timestamp})]
+
         except (ConnectionFailure, BulkWriteError) as e:
             LOGGER.error('An error has occurred. Check traceback.')
             print(e)
+
+    def get_last_currency_by_id(self, currency_id) -> dict:
+        try:
+            client = self.client()
+            db = client['cryptosdb']
+
+            last_request_timestamp = self.get_last_request_timestamp(db)
+
+            collection = db[self.collection_data]
+            return collection.find_one({'id': currency_id, '_created_at': last_request_timestamp})
+
+        except (ConnectionFailure, BulkWriteError) as e:
+            LOGGER.error('An error has occurred. Check traceback.')
+            print(e)
+
+    def get_last_request_timestamp(self, db):
+        requests_timestamp_collection = db[f'{self.collection_data}_requests_timestamp']
+        return [r['request_timestamp'] for r in requests_timestamp_collection.find()][-1]
 
     @abstractmethod
     def need_alert(self):

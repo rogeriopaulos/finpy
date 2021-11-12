@@ -15,7 +15,7 @@ class NomicsCryptoAPI(CryptoAPI):
         self.parameters = parameter
 
     def __str__(self):
-        return 'Nomics Cryptocurrency & Bitcoin API'
+        return 'Crypto Market Cap & Pricing Data Provided By Nomics'
 
     def make_request(self) -> Response:
         url = f'{self.base_url}/currencies/ticker'
