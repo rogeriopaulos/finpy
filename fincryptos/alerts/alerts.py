@@ -38,10 +38,26 @@ class AlertCurrencyGeneralInfo(BaseAlert):
         return True if len(content) > 0 else False
 
     def get_title(self):
-        return f'[ALERTA] Últimas informações da "{self.id.upper()}"'
+        return f'"{self.id.upper()}" INFO'
 
     def get_content(self):
         content = self.get_last_currency_by_id(self.id)
+
+        datetimes_convert_fields = [
+            'price_date', 'price_timestamp', 'first_candle', 'first_trade', 'first_order_book'
+        ]
+        for field in datetimes_convert_fields:
+            datetime_obj = self.strdatetime2datetime(content.get(field))
+            content[field] = datetime_obj
+
+        content['price'] = float(content['price'])
+
+        fields_large_numbers = ['circulating_supply', 'market_cap', 'max_supply']
+        for field in fields_large_numbers:
+            if field in content.keys():
+                float_num = float(content[field])
+                content[field] = "{:,}".format(float_num)
+
         return content
 
     def get_source(self):

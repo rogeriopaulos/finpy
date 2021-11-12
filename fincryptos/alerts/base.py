@@ -1,3 +1,4 @@
+import datetime as dt
 from abc import ABC, abstractmethod
 
 from jinja2 import Environment, PackageLoader, select_autoescape
@@ -66,3 +67,7 @@ class BaseAlert(ABC):
         env = Environment(loader=PackageLoader("fincryptos"), autoescape=select_autoescape())
         template = env.get_template(self.template_name)
         return template.render(title=self.get_title(), content=self.get_content(), source=self.get_source())
+
+    def strdatetime2datetime(self, datetime_str):
+        pattern = '%Y-%m-%dT%H:%M:%SZ'
+        return dt.datetime.strptime(datetime_str, pattern)

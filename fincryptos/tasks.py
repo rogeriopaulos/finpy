@@ -3,7 +3,7 @@ import os
 from celery import Celery
 from celery.schedules import crontab
 
-from fincryptos.alerts.alerts import AlertStartCryptoWithLetter, AlertCurrencyGeneralInfo
+from fincryptos.alerts.alerts import AlertCurrencyGeneralInfo
 from fincryptos.alerts.runner import send_alerts_if_need
 from fincryptos.apis.coinmarketcap import CoinMarketCap
 from fincryptos.apis.nomics import Nomics
@@ -61,9 +61,8 @@ def clear_cmc_collection():
 # Alerts Tasks
 # ------------------------------------------------------------------------------
 @app.task
-def send_nomics_alerts_after_save():
-    # alert1 = AlertStartCryptoWithLetter('B')
-    alert1 = AlertCurrencyGeneralInfo('BTC')
+def send_nomics_alerts_after_save(general_info_id='BTC'):
+    alert1 = AlertCurrencyGeneralInfo(general_info_id)
 
     alerts = [alert1]
     response = send_alerts_if_need(alerts)
