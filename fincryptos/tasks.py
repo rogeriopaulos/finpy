@@ -21,7 +21,7 @@ app.conf.timezone = 'America/Fortaleza'
 @app.on_after_configure.connect
 def setup_periodic_tasks(sender, **kwargs):
     # Requests to nomics api frequency
-    sender.add_periodic_task(crontab(minute='*/30'), send_nomics_data2mongo.s())  # test
+    sender.add_periodic_task(crontab(minute='*/15'), send_nomics_data2mongo.s())  # test
     # sender.add_periodic_task(crontab(minute='*/1'), send_nomics_data2mongo.s())  # production
 
     # Requests to coinmarketcap api

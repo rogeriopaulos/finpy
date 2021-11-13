@@ -1,6 +1,7 @@
 import datetime as dt
 from abc import ABC, abstractmethod
 
+import pytz
 from jinja2 import Environment, PackageLoader, select_autoescape
 from pymongo.errors import BulkWriteError, ConnectionFailure
 
@@ -70,4 +71,6 @@ class BaseAlert(ABC):
 
     def strdatetime2datetime(self, datetime_str):
         pattern = '%Y-%m-%dT%H:%M:%SZ'
-        return dt.datetime.strptime(datetime_str, pattern)
+        local_tz = pytz.timezone('America/Fortaleza')
+        dt_obj = dt.datetime.strptime(datetime_str, pattern).replace(tzinfo=dt.timezone.utc)
+        return dt_obj.astimezone(local_tz)
