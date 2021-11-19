@@ -1,4 +1,4 @@
-from fincryptos.bot import Telegram
+from fincryptos.core import Telegram
 
 
 def send_alerts_if_need(alerts: list):
