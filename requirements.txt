@@ -5,6 +5,7 @@ flower==1.0.0  # https://github.com/mher/flower
 ipython==7.28.0  # https://ipython.org/
 Jinja2==3.0.2  # https://jinja.palletsprojects.com/en/3.0.x/
 kombu==5.2.0  # https://github.com/celery/kombu
+pycoingecko==2.2.0  # https://github.com/man-c/pycoingecko
 pymongo==3.12.1  # https://pymongo.readthedocs.io/en/stable/
 python-telegram-bot==13.8.1  # https://python-telegram-bot.org/
 redis==3.5.3  # https://github.com/antirez/redis

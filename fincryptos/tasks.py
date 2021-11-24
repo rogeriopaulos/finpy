@@ -5,6 +5,7 @@ from celery.schedules import crontab
 
 from fincryptos.alerts.alerts import AlertCurrencyGeneralInfo
 from fincryptos.alerts.runner import send_alerts_if_need
+from fincryptos.apis.coingecko import CoinGecko
 from fincryptos.apis.coinmarketcap import CoinMarketCap
 from fincryptos.apis.nomics import Nomics
 from fincryptos.core import clear_collections, send2mongo
@@ -27,6 +28,9 @@ def setup_periodic_tasks(sender, **kwargs):
     # Requests to coinmarketcap api
     # sender.add_periodic_task(crontab(minute=0, hour='*/3'), send_coinmaeketcap_data2mongo.s())
 
+    # Requests to coingecko api
+    sender.add_periodic_task(crontab(minute='*/3'), send_coingecko_data2mongo.s())
+
     # Clear mongodb cryptos collection once week -> on sundays at midnight
     sender.add_periodic_task(crontab(minute=0, hour=0, day_of_week=0), clear_nomics_collection.s())
     # sender.add_periodic_task(crontab(minute=0, hour=0, day_of_week=0), clear_cmc_collection.s())
@@ -45,6 +49,12 @@ def send_nomics_data2mongo():
 @app.task
 def send_coinmaeketcap_data2mongo():
     result = send2mongo(CoinMarketCap())
+    return result
+
+
+@app.task
+def send_coingecko_data2mongo():
+    result = send2mongo(CoinGecko())
     return result
 
 
